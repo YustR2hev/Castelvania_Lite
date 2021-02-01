@@ -1,29 +1,20 @@
-# Imports
 import pygame
 from pygame import *
 import sys
-
-# Screen Dimensions
 
 WIN_WIDTH = 768
 WIN_HEIGHT = 672
 HALF_WIDTH = int(WIN_WIDTH / 2)
 HALF_HEIGHT = int(WIN_HEIGHT / 2)
 
-# Screen Defaults
-
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 DEPTH = 32
 FLAGS = 0
 CAMERA_SLACK = 30
 
-# Init, Create Screen
 pygame.init()
 screen = pygame.display.set_mode(DISPLAY, FLAGS, DEPTH)
 
-##############Drawing Code##############
-
-# Load Megaman Sprite Sheet
 spritesheet = pygame.image.load("Media/Graphics/megamansprite.png")
 
 character = Surface((19, 22), pygame.SRCALPHA)
@@ -248,8 +239,6 @@ stage = Surface((300, 150), pygame.SRCALPHA)
 stage.blit(character, (130, 0))
 takedamageright = stage
 
-# Load Buster Shots Sprite Sheet
-
 spritesheet = pygame.image.load("Media/Graphics/bustershots2.png")
 
 character = Surface((12, 13), pygame.SRCALPHA)
@@ -280,8 +269,6 @@ stage = Surface((300, 150), pygame.SRCALPHA)
 stage.blit(character, (130, 0))
 bustershot4 = stage
 
-# Load SMB Enemies Sprite Sheet
-
 spritesheet = pygame.image.load("Media/Graphics/smbenemiessheet.png")
 
 character = Surface((16, 16), pygame.SRCALPHA)
@@ -306,8 +293,6 @@ stage.blit(character, (130, 30))
 goombadead = stage
 
 goombawalk = [goombaleft, goombaright]
-
-# Load Explosion Sprite Sheet
 
 spritesheet = pygame.image.load("Media/Graphics/explosion.png")
 
@@ -408,8 +393,6 @@ explode12 = stage
 explosion = [explode1, explode2, explode3, explode4, explode5, explode6, explode7, explode8, explode9, explode10,
              explode11, explode12]
 
-# Load Bubble Bobble Enemies Sprite Sheet
-
 spritesheet = pygame.image.load("Media/Graphics/bubblebobble.png")
 
 character = Surface((14, 16), pygame.SRCALPHA)
@@ -427,8 +410,6 @@ stage.blit(character, (130, 0))
 toasterwalk2 = stage
 
 toasterwalkloop = [toasterwalk1, toasterwalk2]
-
-# Load Item Sprite Sheet
 
 spritesheet = pygame.image.load("Media/Graphics/item.png")
 
@@ -456,27 +437,18 @@ itemframe3 = stage
 itemloop = [itemframe1, itemframe2, itemframe3]
 
 
-########################################
-
-# Main Function
 def main():
-    # Create clock, set caption
     timer = pygame.time.Clock()
     pygame.display.set_caption("Platform")
 
-    # Create Game
     game = Game()
 
-    # Create Player
     player = Player(game)
 
-    # Create Display
     display = Display("")
 
-    # Create level
     room = Rooms(game, player)
 
-    # Main Loop
     while 1:
         timer.tick(60)
 
@@ -528,7 +500,6 @@ def main():
 
 class Game(object):
     def __init__(self):
-        # Create Sprite Groups
         self.entities = pygame.sprite.Group()
         self.playerentity = pygame.sprite.Group()
         self.projectilegroup = pygame.sprite.Group()
@@ -538,20 +509,13 @@ class Game(object):
         self.titlegroup = pygame.sprite.Group()
         self.detectablegroup = pygame.sprite.Group()
         self.itemgroup = pygame.sprite.Group()
-        # Create Camera
         self.camera = ""
         self.camerafocus = ""
-        # Create Platforms
         self.platforms = []
-        # Create Screen Focus
         self.screenfocus = "Title"
-        # Create Title
         self.title = Title(self)
-        # Create Gameover
         self.gameover = GameOver(self)
-        # Create Level Complete
         self.levelcomplete = LevelComplete(self)
-        # Create Pause Menu
         self.pausemenu = PauseMenu(self)
 
 
@@ -572,21 +536,16 @@ class Platform(Entity):
 class Player(Entity):
     def __init__(self, game):
         Entity.__init__(self)
-        # Add Player to Game
         self.game = game
         self.game.playerentity.add(self)
-        # Set Player Velocities
         self.xvel = 0
         self.yvel = 0
-        # Set Player Offsets
         self.xoffset = -128
         self.yoffset = 0
-        # Counters
         self.walkcounter = 0
         self.standcounter = 0
         self.attackcounter = 0
         self.takedamagecounter = 0
-        # States
         self.collideright = False
         self.onGround = True
         self.airborne = False
@@ -594,10 +553,8 @@ class Player(Entity):
         self.takingdamage = False
         self.attacking = False
         self.moving = False
-        # Create Player Sprite
         self.image = Surface((300, 150), pygame.SRCALPHA)
         self.rect = Rect(0, 0, 300, 150)
-        # Create Player Detectable Area
         self.detectable = pygame.sprite.Sprite()
         self.detectable.rect = Rect(0, 0, 80, 90)
         self.detectable.image = Surface((80, 90))
@@ -605,10 +562,8 @@ class Player(Entity):
         self.detectable.image.set_alpha(150)
         self.detectable.image.convert_alpha()
         self.game.detectablegroup.add(self.detectable)
-        # Life Meter
         self.lifetotal = ["", "l", "ll", "lll", "llll", "lllll", "llllll", "lllllll", "llllllll", "lllllllll"]
         self.currentlifetotal = 9
-        # Inputs
         self.up = False
         self.down = False
         self.right = False
@@ -656,92 +611,71 @@ class Player(Entity):
     def update(self):
         self.inputhandler()
 
-        # Apply Inputs
         if self.up:
             if self.onGround:
                 self.yvel -= 10.6
-            # Only jump if on the ground
         if self.down:
             pass
-            # Does nothing
         if self.left:
             self.faceright = False
             if self.takingdamage == False:
                 self.xvel = -8
                 self.moving = True
-            # Move if not taking damage
         if self.right:
             self.faceright = True
             if self.takingdamage == False:
                 self.xvel = 8
                 self.moving = True
-            # Move if not taking damage
         if self.space:
             projectile = Projectile(self, self.game)
             self.game.projectilegroup.add(projectile)
             self.space = False
             self.attacking = True
-            # Create projectile on space
 
-        # Apply States
         if self.yvel < 0: self.airborne = True
-        # Player is moving up
         if self.yvel > 1.2: self.airborne = True
-        # Player is falling
         if self.onGround == True:
             if self.up == True:
                 self.airborne == True
             else:
                 self.airborne = False
-            # Still airborne while pressing up
         if not self.onGround:
             self.yvel += 0.3
-            # Apply gravity
             if self.yvel > 100:
                 self.yvel = 100
-                # Max falling speed
         if not (self.left or self.right):
             if not self.takingdamage:
                 self.moving = False
                 self.xvel = 0
-            # Stop player if not taking damage
         if self.takingdamage:
             if self.collideright:
                 self.xvel = -8
             else:
                 self.xvel = 8
-            # Move player if taking damage
         if self.attackcounter > 8:
             self.attacking = False
             self.attackcounter = 0
             self.standcounter = 0
-            # Stop attacking after 9 updates
         if self.takedamagecounter > 13:
             self.takingdamage = False
             self.takedamagecounter = 0
-            # Player stops taking damage after 14 updates
 
-        # Increase or Reset Counters
         if self.attacking: self.attackcounter = self.attackcounter + 1
         if self.takingdamage: self.takedamagecounter = self.takedamagecounter + 1
         if not self.moving: self.standcounter = 0
 
-        # Collisions
         self.detectable.rect.left += self.xvel
         self.collide(self.xvel, 0)
         self.detectable.rect.top += self.yvel
         self.onGround = False;
         self.collide(0, self.yvel)
 
-        # Offsets
         self.rect.x = self.detectable.rect.x + self.xoffset
         self.rect.y = self.detectable.rect.y + self.yoffset
 
-        # Animate
         self.animate()
 
     def collide(self, xvel, yvel):
-        # Collide Platforms
         for p in self.game.platforms:
             if pygame.sprite.collide_rect(self.detectable, p):
                 if xvel > 0:
@@ -755,7 +689,6 @@ class Player(Entity):
                 if yvel < 0:
                     self.detectable.rect.top = p.rect.bottom
 
-        # Collide Enemies
         for e in self.game.enemygroup:
             if pygame.sprite.collide_rect(self.detectable, e.detectable):
                 leftdifference = self.detectable.rect.right - e.detectable.rect.left
@@ -770,13 +703,11 @@ class Player(Entity):
                     self.game.screenfocus = "Game Over"
                     self.currentlifetotal = 0
 
-        # Collide Items
         for i in self.game.itemgroup:
             if pygame.sprite.collide_rect(self.detectable, i.detectable):
                 self.game.levelcomplete.createlevelcomplete()
                 self.game.screenfocus = "Level Complete"
 
-        # Collide Exits
         for x in self.game.exitgroup:
             if pygame.sprite.collide_rect(self.detectable, x):
                 x.changeroom()
@@ -790,7 +721,6 @@ class Player(Entity):
         state.append(self.takingdamage)
         state.append(self.attacking)
 
-        # Moving
         if state[1]:
             if state[0]:
                 if state[2]:
@@ -814,7 +744,6 @@ class Player(Entity):
                 else:
                     self.standloop(standloopleft)
 
-        # Attacking
         if state[4]:
             if state[0]:
                 if state[2]:
@@ -833,14 +762,12 @@ class Player(Entity):
                     else:
                         self.updatecharacter(shootleftstand)
 
-        # Hurt
         if state[3]:
             if state[2]:
                 self.updatecharacter(takedamageright)
             else:
                 self.updatecharacter(takedamageleft)
 
-    # Standing Animation Loop
     def standloop(self, loop):
         if self.standcounter == 0 or self.standcounter == 1:
             self.walkcounter = 0
@@ -852,7 +779,6 @@ class Player(Entity):
             self.standcounter = 0
         self.standcounter = self.standcounter + 1
 
-    # Walking Animation Loop
     def walkloop(self, loop):
         if self.walkcounter == 0 or self.walkcounter == 1:
             self.standcounter = 0
@@ -870,7 +796,6 @@ class Player(Entity):
             self.walkcounter = 5
         self.walkcounter = self.walkcounter + 1
 
-    # Update Current Frame
     def updatecharacter(self, ansurf):
         self.image = ansurf
 
@@ -879,14 +804,12 @@ class Projectile(Entity):
     def __init__(self, player, game):
         Entity.__init__(self)
         self.detectable = pygame.sprite.Sprite()
-        # Place Projectile Facing Right
         if player.faceright == True:
             self.xvel = 15
             x = player.detectable.rect.right + 18
             y = player.detectable.rect.top + 18
             self.image = bustershot1
             self.detectable.rect = Rect(x, y, 32, 32)
-        # Place Projectile Facing Left
         elif player.faceright == False:
             self.xvel = -15
             x = player.detectable.rect.left - 114
@@ -947,23 +870,19 @@ class Rooms(object):
 
     def createroom1(self, entrance):
 
-        # Set Background
         self.setbackground("Media/Graphics/Backgrounds/room1.png")
 
-        # Set Up Player
         if entrance == "a":
             self.player.startingposition(160, 318)
         elif entrance == "b":
             self.player.startingposition(2992, 1086)
 
-        # Set Up Enemies
         self.game.enemygroup.add(Goomba(748, 534, -2))
         self.game.enemygroup.add(Toaster(868, 1016, 200, -2))
         self.game.enemygroup.add(Toaster(1672, 1209, 600, -2))
         self.game.enemygroup.add(Toaster(1868, 1209, 600, -2))
         self.game.enemygroup.add(Goomba(2868, 1109, -2))
 
-        # Set Up Platforms
         self.game.platforms.append(Platform(48, 424, 976, 40))
         self.game.platforms.append(Platform(0, 0, 48, 468))
         self.game.platforms.append(Platform(48, 136, 32, 16))
@@ -975,18 +894,14 @@ class Rooms(object):
         self.game.platforms.append(Platform(928, 280, 96, 48))
         self.game.platforms.append(Platform(1026, 393, 64, 32))
 
-        # Set Up Exits
         self.game.exitgroup.add(RoomExit(self, 1025, 328, 40, 64, 3, "a"))
 
     def createroom2(self, entrance):
 
-        # Set Up Background
         self.setbackground("Media/Graphics/Backgrounds/room2.png")
 
-        # Set Up Player
         if entrance == "a": self.player.startingposition(0, 366)
 
-        # Set Up Platforms
         self.game.platforms.append(Platform(0, 152, 48, 72))
         self.game.platforms.append(Platform(48, 168, 48, 56))
         self.game.platforms.append(Platform(96, 184, 64, 40))
@@ -999,15 +914,12 @@ class Rooms(object):
         self.game.platforms.append(Platform(48, 0, 48, 72))
         self.game.platforms.append(Platform(0, 0, 48, 88))
 
-        # Set Up Exits
         self.game.exitgroup.add(RoomExit(self, -32, 88, 32, 64, 3, "b"))
 
     def createroom3(self, entrance):
 
-        # Set Up Background
         self.setbackground("Media/Graphics/Backgrounds/room3.png")
 
-        # Set Up Player
         if entrance == "a":
             self.player.startingposition(8, 1086)
         elif entrance == "b":
@@ -1017,7 +929,6 @@ class Rooms(object):
         elif entrance == "d":
             self.player.startingposition(688, 318)
 
-        # Set Up Platforms
         self.game.platforms.append(Platform(0, 0, 32, 328))
         self.game.platforms.append(Platform(32, 0, 192, 24))
         self.game.platforms.append(Platform(224, 0, 32, 72))
@@ -1060,10 +971,8 @@ class Rooms(object):
         self.game.platforms.append(Platform(-32, 392, 32, 16))
         self.game.platforms.append(Platform(256, 136, 32, 16))
 
-        # Set Up Enemies
         self.game.enemygroup.add(Goomba(360, 510, 2))
 
-        # Set Up Exits
         self.game.exitgroup.add(RoomExit(self, -40, 328, 40, 64, 1, "b"))
         self.game.exitgroup.add(RoomExit(self, 256, 840, 32, 64, 2, "a"))
         self.game.exitgroup.add(RoomExit(self, -32, 840, 32, 64, 4, "a"))
@@ -1071,13 +980,10 @@ class Rooms(object):
 
     def createroom4(self, entrance):
 
-        # Set Up Background
         self.setbackground("Media/Graphics/Backgrounds/room4.png")
 
-        # Set Up Player
         if entrance == "a": self.player.startingposition(672, 318)
 
-        # Set Up Platforms
         self.game.platforms.append(Platform(48, 168, 160, 40))
         self.game.platforms.append(Platform(0, 0, 48, 208))
         self.game.platforms.append(Platform(48, 0, 160, 24))
@@ -1085,18 +991,14 @@ class Rooms(object):
         self.game.platforms.append(Platform(208, 136, 48, 72))
         self.game.platforms.append(Platform(256, 136, 32, 16))
 
-        # Set Up Exits
         self.game.exitgroup.add(RoomExit(self, 256, 56, 32, 80, 3, "c"))
 
     def createroom5(self, entrance):
 
-        # Set Up Background
         self.setbackground("Media/Graphics/Backgrounds/room2.png")
 
-        # Set Up Player
         if entrance == "a": self.player.startingposition(0, 366)
 
-        # Set Up Platforms
         self.game.platforms.append(Platform(0, 152, 48, 72))
         self.game.platforms.append(Platform(48, 168, 48, 56))
         self.game.platforms.append(Platform(96, 184, 64, 40))
@@ -1109,10 +1011,8 @@ class Rooms(object):
         self.game.platforms.append(Platform(48, 0, 48, 72))
         self.game.platforms.append(Platform(0, 0, 48, 88))
 
-        # Set Up Items
         self.game.itemgroup.add(Item(46, 109))
 
-        # Set Up Exits
         self.game.exitgroup.add(RoomExit(self, -32, 88, 32, 64, 3, "d"))
 
 
@@ -1157,33 +1057,27 @@ def complex_camera(camera, target_rect):
     _, _, w, h = camera
     l, t, _, _ = -l + HALF_WIDTH, -t + HALF_HEIGHT, w, h
 
-    l = min(0, l)  # stop scrolling at the left edge
-    l = max(-(camera.width - WIN_WIDTH), l)  # stop scrolling at the right edge
-    t = max(-(camera.height - WIN_HEIGHT), t)  # stop scrolling at the bottom
-    t = min(0, t)  # stop scrolling at the top
+    l = min(0, l)
+    l = max(-(camera.width - WIN_WIDTH), l)
+    t = max(-(camera.height - WIN_HEIGHT), t)
+    t = min(0, t)
     return Rect(l, t, w, h)
 
 
 class Goomba(Entity):
     def __init__(self, x, y, xvel):
         Entity.__init__(self)
-        # Set Velocities
         self.xvel = xvel
         self.yvel = 0
-        # States
         self.onGround = False
         self.airborne = True
         self.destroyed = False
-        # Offsets
         self.xoffset = -130
         self.yoffset = -30
-        # Counter
         self.counter = 0
-        # Create Sprite Image
         self.image = Surface((300, 450), pygame.SRCALPHA)
         self.image = goombaleft
         self.rect = Rect(x, y, 300, 450)
-        # Create Detectable
         self.detectable = pygame.sprite.Sprite()
         self.detectable.rect = Rect(x, y, 64, 64)
         self.detectable.image = Surface((64, 64))
@@ -1192,7 +1086,6 @@ class Goomba(Entity):
         self.detectable.image.convert_alpha()
 
     def update(self, platforms, projectilegroup):
-        # Move
         if self.yvel < 0: self.airborne = True
         if self.onGround == True: self.airborne = False
         if not self.onGround:
@@ -1200,22 +1093,18 @@ class Goomba(Entity):
             if self.yvel > 1.2: self.airborne = True
             if self.yvel > 100: self.yvel = 100
 
-        # Collisions
         self.detectable.rect.left += self.xvel
         self.collide(self.xvel, 0, platforms, projectilegroup)
         self.detectable.rect.top += self.yvel
         self.onGround = False;
         self.collide(0, self.yvel, platforms, projectilegroup)
 
-        # Apply Offsets
         self.rect.x = self.detectable.rect.x + self.xoffset
         self.rect.y = self.detectable.rect.y + self.yoffset
 
-        # Animate
         self.animate()
 
     def collide(self, xvel, yvel, platforms, projectilegroup):
-        # Collide Platforms
         for p in platforms:
             if pygame.sprite.collide_rect(self.detectable, p):
                 if xvel > 0:
@@ -1230,20 +1119,17 @@ class Goomba(Entity):
                     self.yvel = 0
                 if yvel < 0:
                     self.detectable.rect.top = p.rect.bottom
-        # Collide Projectiles
         for j in projectilegroup:
             if pygame.sprite.collide_rect(self.detectable, j):
                 self.xvel = 0
                 self.destroyed = True
 
-    # Animate
     def animate(self):
         if self.destroyed == True:
             self.destroyloop(explosion)
         else:
             self.walkloop(goombawalk)
 
-    # Walk Loop Animation
     def walkloop(self, loop):
         if self.counter == 10:
             self.updatecharacter(loop[0])
@@ -1252,7 +1138,6 @@ class Goomba(Entity):
             self.counter = 0
         self.counter = self.counter + 1
 
-    # Destroy Loop Animation
     def destroyloop(self, loop):
         if self.counter == 0:
             self.updatecharacter(loop[0])
@@ -1283,7 +1168,6 @@ class Goomba(Entity):
             self.counter = 0
         self.counter = self.counter + 1
 
-    # Update Animation Frame
     def updatecharacter(self, ansurf):
         self.image = ansurf
 
@@ -1291,31 +1175,24 @@ class Goomba(Entity):
 class Toaster(Entity):
     def __init__(self, x, y, track, xvel):
         Entity.__init__(self)
-        # Set Velocities
         self.xvel = xvel
         self.yvel = 0
-        # States
         self.destroyed = False
         self.faceright = False
         self.onGround = False
         self.airborne = True
-        # Offests
         self.xoffset = -130
         self.yoffset = 0
-        # Counter
         self.counter = 0
-        # Configure Track
         if xvel > 0:
             self.min = x
             self.max = x + track
         elif xvel < 0:
             self.max = x
             self.min = x - track
-        # Create Sprite Image
         self.image = Surface((300, 450), pygame.SRCALPHA)
         self.image = toasterwalk1
         self.rect = Rect(x, y, 300, 450)
-        # Create Dectectable
         self.detectable = pygame.sprite.Sprite()
         self.detectable.rect = Rect(x, y, 64, 64)
         self.detectable.image = Surface((64, 64))
@@ -1324,7 +1201,6 @@ class Toaster(Entity):
         self.detectable.image.convert_alpha()
 
     def update(self, platforms, projectilegroup):
-        # Move
         if self.xvel > 0: self.faceright = True
         if self.xvel < 0: self.faceright = False
         self.detectable.rect.left += self.xvel
@@ -1332,30 +1208,25 @@ class Toaster(Entity):
         if self.detectable.rect.left == self.min: self.xvel = abs(self.xvel)
         self.detectable.rect.top += self.yvel
 
-        # Collisions
         self.collide(0, self.yvel, platforms, projectilegroup)
         self.rect.x = self.detectable.rect.x + self.xoffset
         self.rect.y = self.detectable.rect.y + self.yoffset
 
-        # Animate
         self.animate()
 
     def collide(self, xvel, yvel, platforms, projectilegroup):
-        # Collide Projectiles
         for j in projectilegroup:
             if pygame.sprite.collide_rect(self.detectable, j):
                 self.destroyed = True
                 self.counter = 0
                 self.xvel = 0
 
-    # Animate
     def animate(self):
         if self.destroyed == True:
             self.destroyloop(explosion)
         else:
             self.walkloop(toasterwalkloop)
 
-    # Walk Loop Animation
     def walkloop(self, loop):
         if self.counter == 10:
             self.updatecharacter(loop[0])
@@ -1366,7 +1237,6 @@ class Toaster(Entity):
             self.counter = 0
         self.counter = self.counter + 1
 
-    # Destroy Loop Animation
     def destroyloop(self, loop):
         if self.counter == 0:
             self.yoffset = -30
@@ -1398,7 +1268,6 @@ class Toaster(Entity):
             self.counter = 0
         self.counter = self.counter + 1
 
-    # Update Animation Frame
     def updatecharacter(self, ansurf):
         self.image = ansurf
 
@@ -1432,14 +1301,11 @@ class PauseMenu(object):
         self.game = game
 
     def createpausemenu(self):
-        # Empty Sprite Groups
         self.game.titlegroup.empty()
         self.game.menugroup.empty()
-        # Create Background Sprite
         bg = Entity()
         bg.image = pygame.image.load("Media/Graphics/Backgrounds/title.jpg")
         self.game.titlegroup.add(bg)
-        # Create String Sprite
         ss = Entity()
         font = pygame.font.Font(None, 80)
         ss.image = font.render("Paused", 1, (255, 255, 255))
@@ -1468,14 +1334,11 @@ class LevelComplete(object):
         self.game = game
 
     def createlevelcomplete(self):
-        # Empty Sprite Groups
         self.game.titlegroup.empty()
         self.game.menugroup.empty()
-        # Create Background Sprite
         bg = Entity()
         bg.image = pygame.image.load("Media/Graphics/Backgrounds/title.jpg")
         self.game.titlegroup.add(bg)
-        # Create String Sprite
         ss = Entity()
         font = pygame.font.Font(None, 80)
         ss.image = font.render("Level Complete", 1, (255, 255, 255))
@@ -1490,14 +1353,11 @@ class GameOver(object):
         self.game = game
 
     def creategameover(self):
-        # Empty Sprite Groups
         self.game.titlegroup.empty()
         self.game.menugroup.empty()
-        # Create Background Sprite
         bg = Entity()
         bg.image = pygame.image.load("Media/Graphics/Backgrounds/title.jpg")
         self.game.titlegroup.add(bg)
-        # Create String Sprite
         ss = Entity()
         font = pygame.font.Font(None, 80)
         ss.image = font.render("Game Over", 1, (255, 255, 255))
@@ -1514,10 +1374,8 @@ class Title(object):
         self.createtitle()
 
     def createtitle(self):
-        # Empty Sprite Groups
         self.game.titlegroup.empty()
         self.game.menugroup.empty()
-        # Create Background Sprite
         bg = Entity()
         bg.image = pygame.image.load("Media/Graphics/Backgrounds/title.jpg")
         self.game.titlegroup.add(bg)
@@ -1535,7 +1393,6 @@ class Title(object):
 
     def update(self):
         self.inputhandler()
-        # Animate Title Screen
         if self.counter == 100:
             ss = Entity()
             font = pygame.font.Font(None, 80)
